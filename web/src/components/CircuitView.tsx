@@ -6,7 +6,7 @@ import { hexToBytes } from '@core/hex.mjs';
 
 const COL = 92, ROW = 34, PAD = 40;
 
-export default function CircuitView({ hex, nIn, nOut }: { hex: string; nIn: number; nOut: number }) {
+export default function CircuitView({ hex, nIn, nOut, compact = false }: { hex: string; nIn: number; nOut: number; compact?: boolean }) {
   const layout = useMemo(() => {
     const els = decode(hexToBytes(hex), nIn);
     if (els.length > 400) return null;
@@ -53,10 +53,10 @@ export default function CircuitView({ hex, nIn, nOut }: { hex: string; nIn: numb
             if (!a || !b) return null;
             if (e.latch) {
               const midY = Math.max(a.y, b.y) + ROW * 0.6;
-              return <path key={i} d={`M${a.x + 12} ${a.y} C ${a.x + 60} ${midY}, ${b.x - 60} ${midY}, ${b.x - 12} ${b.y}`} fill="none" stroke="var(--accent)" strokeWidth={1.2} strokeDasharray="4 3" opacity={0.8} />;
+              return <path key={i} className="fb" d={`M${a.x + 12} ${a.y} C ${a.x + 60} ${midY}, ${b.x - 60} ${midY}, ${b.x - 12} ${b.y}`} fill="none" stroke="var(--accent)" strokeWidth={1.4} strokeDasharray="4 3" opacity={0.85} />;
             }
             const mx = (a.x + b.x) / 2;
-            return <path key={i} d={`M${a.x + 12} ${a.y} C ${mx} ${a.y}, ${mx} ${b.y}, ${b.x - 12} ${b.y}`} fill="none" stroke="var(--wire)" strokeWidth={1.2} opacity={0.55} />;
+            return <path key={i} className="wire" d={`M${a.x + 12} ${a.y} C ${mx} ${a.y}, ${mx} ${b.y}, ${b.x - 12} ${b.y}`} fill="none" stroke="var(--wire)" strokeWidth={1.3} opacity={0.6} />;
           })}
           {pos.map((p, w) => {
             if (!p || w >= W) return null;
@@ -76,11 +76,11 @@ export default function CircuitView({ hex, nIn, nOut }: { hex: string; nIn: numb
           })}
         </svg>
       </div>
-      <div className="legend">
+      {!compact && <div className="legend">
         <span><i style={{ border: '1.5px solid var(--wire)' }} />NAND gate (column = depth)</span>
         <span><i style={{ background: 'color-mix(in srgb, var(--accent) 25%, transparent)', border: '1.5px solid var(--accent)' }} />Latch (memory, dashed = what it stores next)</span>
         <span><i style={{ border: '2px solid var(--good)' }} />Output</span>
-      </div>
+      </div>}
     </>
   );
 }

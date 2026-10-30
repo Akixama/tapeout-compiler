@@ -6,6 +6,7 @@ import { bonusOf, fmt, loadVectors, short, verifiability, type Bundle, type Task
 import { liveLeader } from '../chain';
 import CircuitView from '../components/CircuitView';
 import CostChart from '../components/CostChart';
+import Bars from '../components/Bars';
 import type { Done, Progress, StartMsg } from '../optimizer.worker';
 
 export default function TaskPage({ bundle, id }: { bundle: Bundle; id: number }) {
@@ -42,39 +43,40 @@ function TaskView({ t }: { t: Task }) {
         </div>
       </div>
 
-      <div className="cards">
-        <div className="card">
-          <h3>Reference design</h3>
-          <div className="big">{fmt(t.Cref)}</div>
-          <div className="sub">{t.refGates} gates · depth {t.refDepth}</div>
-        </div>
-        <div className="card">
-          <h3>Current leader</h3>
-          <div className="big">{fmt(leaderCost)}</div>
-          <div className="sub">
-            {t.leader.gates} gates{t.leader.latches ? ` · ${t.leader.latches} latches` : ''} · depth {t.leader.depth} · circuit #{t.leader.circuitId} on {short(t.leader.cpu)}
-          </div>
-          <div className="sub" style={{ marginTop: 6 }}>
-            {live === 'loading' ? 'Checking BNB Chain…'
-              : live === 'error' ? 'Could not reach BNB Chain.'
-              : live ? (live.cost === t.leader.cost ? '✓ Still the leader right now.' : `Changed: now ${fmt(live.cost)} (circuit #${live.circuitId}).`)
-              : <button className="btn" style={{ padding: '4px 10px' }} onClick={refresh}>Check live</button>}
-          </div>
-        </div>
-        <div className="card ours">
-          <h3>Best we found</h3>
+      <section className="score">
+        <div>
+          <h3 className="mono" style={{ margin: '0 0 8px', fontSize: 12, color: 'var(--muted)', letterSpacing: '0.06em' }}>BEST WE FOUND</h3>
           {best ? <>
-            <div className="big">{fmt(best.cost)}</div>
-            <div className="sub">{best.gates} gates{best.latches ? ` · ${best.latches} latches` : ''} · depth {best.depth}</div>
-            <div className="sub" style={{ marginTop: 6 }}>
+            <div className="v">{fmt(best.cost)}</div>
+            <div className="delta">
               {best.cost < leaderCost
-                ? <span className="badge win">{Math.round((1 - best.cost / leaderCost) * 100)}% cheaper than the leader</span>
-                : best.cost === leaderCost ? <span className="badge">Ties the leader</span> : <span className="badge">Behind the leader</span>}
-              {' '}Bonus ≈ {Math.round(bonusOf(t, best.cost))} (max {4 * (t.K ?? 0)})
+                ? <><span className="badge win">−{Math.round((1 - best.cost / leaderCost) * 100)}%</span> <b>cheaper than the current leader</b> ({fmt(leaderCost)})</>
+                : best.cost === leaderCost ? <>Ties the current leader ({fmt(leaderCost)})</> : <>Behind the current leader ({fmt(leaderCost)})</>}
             </div>
-          </> : <><div className="big" style={{ color: 'var(--muted)' }}>—</div><div className="sub">Nothing yet. Run the optimizer below.</div></>}
+          </> : <><div className="v" style={{ color: 'var(--muted)' }}>—</div><div className="delta">Nothing yet. Run the optimizer below.</div></>}
+          <Bars rows={[
+            { label: 'Reference', value: t.Cref, kind: 'ref' },
+            { label: 'Current leader', value: leaderCost, kind: 'leader' },
+            ...(best ? [{ label: 'Ours', value: best.cost, kind: 'ours' as const }] : []),
+          ]} />
         </div>
-      </div>
+        <div className="meta">
+          {best && <div><span>Our design</span><span>{best.gates} gates{best.latches ? ` · ${best.latches} latches` : ''} · depth {best.depth}</span></div>}
+          {best && <div><span>Mining bonus</span><span>≈ {Math.round(bonusOf(t, best.cost))} of max {4 * (t.K ?? 0)}</span></div>}
+          <div><span>Leader design</span><span>{t.leader.gates} gates{t.leader.latches ? ` · ${t.leader.latches} latches` : ''} · depth {t.leader.depth}</span></div>
+          <div><span>Leader circuit</span><span>#{t.leader.circuitId} on {short(t.leader.cpu)}</span></div>
+          <div><span>Reference design</span><span>{t.refGates} gates · depth {t.refDepth}</span></div>
+          <div>
+            <span>Live status</span>
+            <span>
+              {live === 'loading' ? 'Checking BNB Chain…'
+                : live === 'error' ? 'Could not reach BNB Chain'
+                : live ? (live.cost === t.leader.cost ? '✓ Still the leader' : `Changed: now ${fmt(live.cost)}`)
+                : <button className="btn" style={{ padding: '2px 10px', fontSize: 13 }} onClick={refresh}>Check live</button>}
+            </span>
+          </div>
+        </div>
+      </section>
 
       <Circuits t={t} found={found} />
       <Optimizer t={t} leaderCost={leaderCost} onFound={setFound} />
