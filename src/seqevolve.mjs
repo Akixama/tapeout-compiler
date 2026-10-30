@@ -4,7 +4,7 @@
 // All sequences are simulated in parallel, one bit per sequence.
 import { OP } from './netlist.mjs';
 
-const hexBytes = (h) => Uint8Array.from(Buffer.from(h.replace(/^0x/, ''), 'hex'));
+import { hexToBytes as hexBytes, bytesToHex } from './hex.mjs';
 const getBit = (bytes, i) => (bytes[i >> 3] >> (i & 7)) & 1;
 
 // Packs vectors into per-cycle bitsets: inBits[c][i] and outBits[c][o], one bit per sequence.
@@ -108,6 +108,17 @@ function randomElement(k, n, G, rnd, latchRate) {
   return { op: OP.NAND, a: Math.floor(rnd() * (n + k)), b: Math.floor(rnd() * (n + k)) };
 }
 
+// Insert unused spare elements just before the output block, renumbering references.
+export function withSpares(start, nIn, nOut, spares, seed = 3) {
+  const n = 2 + nIn, rnd = rng(seed);
+  const pos = start.length - nOut, at = n + pos;
+  const shift = (x) => (x >= at ? x + spares : x);
+  const g = start.map((e) => (e.op === OP.NAND ? { op: e.op, a: shift(e.a), b: shift(e.b) } : { op: e.op, d: shift(e.d) }));
+  const extra = Array.from({ length: spares }, (_, j) => ({ op: OP.NAND, a: Math.floor(rnd() * (at + j)), b: Math.floor(rnd() * (at + j)) }));
+  g.splice(pos, 0, ...extra);
+  return g;
+}
+
 export function seqEvolve(spec, { size = 24, seed = 1, timeLimitMs = 10000, latchRate = 0.25, start = null, target = Infinity } = {}) {
   const rnd = rng(seed), n = 2 + spec.nIn;
   let g = start ? start.map((e) => ({ ...e })) : Array.from({ length: size }, (_, k) => randomElement(k, n, size, rnd, latchRate));
@@ -143,5 +154,6 @@ export function seqEvolve(spec, { size = 24, seed = 1, timeLimitMs = 10000, latc
       for (let j = saved.length - 1; j >= 0; j--) g[saved[j][0]] = saved[j][1];
     }
   }
-  return best ? { ...best, iterations: it } : { iterations: it, errorsLeft: err };
+  // `current` lets a caller resume the search from where it stopped.
+  return best ? { ...best, iterations: it, current: g } : { iterations: it, errorsLeft: err, current: g };
 }

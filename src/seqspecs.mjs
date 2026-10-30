@@ -117,7 +117,7 @@ export const CANDIDATES = {
   80: accumulator(),
 };
 
-const hexBytes = (h) => Uint8Array.from(Buffer.from(h.replace(/^0x/, ''), 'hex'));
+import { hexToBytes as hexBytes, bytesToHex } from './hex.mjs';
 const getBit = (bytes, i) => (bytes[i >> 3] >> (i & 7)) & 1;
 
 export function decodeVector(task, v) {
@@ -133,7 +133,7 @@ export function encodeVector(task, ins, outs) {
   const a = new Uint8Array(inB * task.cycles), b = new Uint8Array(outB * task.cycles);
   ins.forEach((x, c) => x.forEach((v, i) => { if (v) a[c * inB + (i >> 3)] |= 1 << (i & 7); }));
   outs.forEach((x, c) => x.forEach((v, o) => { if (v) b[c * outB + (o >> 3)] |= 1 << (o & 7); }));
-  return { input: '0x' + Buffer.from(a).toString('hex'), out: '0x' + Buffer.from(b).toString('hex') };
+  return { input: bytesToHex(a), out: bytesToHex(b) };
 }
 
 // Returns { name, fn } for the single candidate that matches all official vectors, or null.

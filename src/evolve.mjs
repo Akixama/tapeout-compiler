@@ -3,7 +3,7 @@
 // raise TapeOut's cost (gates x depth^3). Neutral changes are accepted so the search can drift.
 import { OP } from './netlist.mjs';
 
-const hexBytes = (h) => Uint8Array.from(Buffer.from(h.replace(/^0x/, ''), 'hex'));
+import { hexToBytes as hexBytes, bytesToHex } from './hex.mjs';
 const bit = (bytes, i) => (bytes[i >> 3] >> (i & 7)) & 1;
 
 // Bit-parallel truth tables: one Uint32Array per wire, one bit per input combination.

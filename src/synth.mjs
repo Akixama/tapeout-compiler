@@ -4,7 +4,7 @@ import { runYosys } from '@yowasp/yosys';
 import { OP, analyze, cost } from './netlist.mjs';
 
 const bit = (bytes, i) => (bytes[i >> 3] >> (i & 7)) & 1;
-const hexBytes = (h) => Uint8Array.from(Buffer.from(h.replace(/^0x/, ''), 'hex'));
+import { hexToBytes as hexBytes, bytesToHex } from './hex.mjs';
 
 // Combinational task whose vectors cover every input -> BLIF truth table.
 export function truthTableBlif(task) {

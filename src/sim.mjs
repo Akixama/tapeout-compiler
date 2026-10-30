@@ -4,7 +4,7 @@
 // Bits are packed little-endian: bit i of the cycle's value = byte[i>>3] >> (i&7).
 import { OP } from './netlist.mjs';
 
-const hexBytes = (h) => Uint8Array.from(Buffer.from(h.replace(/^0x/, ''), 'hex'));
+import { hexToBytes as hexBytes, bytesToHex } from './hex.mjs';
 const bytesPerCycle = (n) => Math.ceil(n / 8) || 0;
 const bit = (bytes, off, i) => (bytes[off + (i >> 3)] >> (i & 7)) & 1;
 
