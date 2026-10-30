@@ -1,5 +1,7 @@
 node_modules/
 .env*
+.vercel/
 out-*.log
-out/
+out/summary.json
 web/dist/
+seqinfo.txt
