@@ -14,12 +14,12 @@ Our circuits are cheaper than the current on-chain leader on **14 tasks**, by 10
 
 | Task | Leader cost | Our cost | Cut |
 |---|---:|---:|---:|
+| #234 Traffic-light FSM (red 4, amber 1, green 3) | 57 | 43 | −25% |
 | #86 4-bit Johnson counter | 36 | 31 | −14% |
 | #95 mod-3 counter 0–1–2 cycle | 30 | 26 | −13% |
 | #82 Divide-by-2 square wave | 8 | 7 | −13% |
 | #221 Divide-by-4 | 24 | 21 | −13% |
 | #235 PWM duty cycle 1/4 | 24 | 21 | −13% |
-| #234 Traffic-light FSM (red 4, amber 1, green 3) | 57 | 50 | −12% |
 | #75 Rising-edge detector | 270 | 243 | −10% |
 | #232 Falling-edge detector | 270 | 243 | −10% |
 | #233 Dual-edge detector | 297 | 270 | −9% |
