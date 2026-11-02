@@ -1,6 +1,6 @@
 # TapeOut Compiler
 
-**Cheaper circuits for [TapeOut](https://tapeout.net) mining, found automatically and checked before they go on-chain.**
+****Cheaper circuits for [TapeOut](https://tapeout.net) mining, found automatically and checked before they go on-chain.****
 
 Live app: **https://tapeout-compiler.vercel.app**
 
